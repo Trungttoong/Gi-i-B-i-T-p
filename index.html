@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Homework Solver - Giải Bài Tập Toán, Lý, Hóa</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Font Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Marked.js for Markdown Rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- KaTeX CSS & JS for Math Rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        bgDark: '#0d0f17',
+                        cardDark: '#151722',
+                        inputBg: '#0e1017',
+                        borderColor: '#232638',
+                        borderHover: '#2a2e42',
+                        accentLavender: '#8b96ff',
+                        accentLavenderHover: '#7985f5',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #0d0f17;
+            color: #f1f5f9;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0d0f17;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #232638;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3b415a;
+        }
+
+        /* Drag and drop highlight */
+        .drag-active {
+            border-color: #8b96ff !important;
+            background-color: rgba(139, 150, 255, 0.05) !important;
+        }
+
+        /* Markdown Output Formatting */
+        .katex-display {
+            margin: 1em 0;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 4px 0;
+        }
+        .prose-custom p {
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+        }
+        .prose-custom h1, .prose-custom h2, .prose-custom h3, .prose-custom h4 {
+            color: #8b96ff;
+            font-weight: 700;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+        .prose-custom ul, .prose-custom ol {
+            margin-left: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+        .prose-custom ul { list-style-type: disc; }
+        .prose-custom ol { list-style-type: decimal; }
+        .prose-custom li { margin-bottom: 0.25rem; }
+        .prose-custom blockquote {
+            border-left: 4px solid #8b96ff;
+            padding-left: 1rem;
+            color: #94a3b8;
+            font-style: italic;
+            margin: 1rem 0;
+        }
+        .prose-custom code {
+            background-color: #1e2235;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9em;
+            color: #e2e8f0;
+        }
+        .prose-custom pre code {
+            display: block;
+            padding: 1rem;
+            overflow-x: auto;
+            background-color: #0b0c13;
+            border: 1px solid #232638;
+            border-radius: 8px;
+        }
+        .prose-custom table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        .prose-custom th, .prose-custom td {
+            border: 1px solid #232638;
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+        }
+        .prose-custom th {
+            background-color: #1a1d2c;
+            color: #8b96ff;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-3 sm:p-6 md:p-8">
+
+    <div class="max-w-4xl w-full mx-auto space-y-6">
+
+        <!-- Top Header & Status Row -->
+        <header class="flex flex-wrap items-center justify-between gap-4 px-1">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-accentLavender/10 border border-accentLavender/30 flex items-center justify-center text-accentLavender font-bold text-xl shadow-lg shadow-accentLavender/5">
+                    ✨
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+                        AI Homework Solver
+                        <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-accentLavender/10 text-accentLavender border border-accentLavender/20">v3.1</span>
+                    </h1>
+                    <p class="text-xs sm:text-sm text-slate-400">Trợ lý giải bài tập Toán, Lý, Hóa bằng trí tuệ nhân tạo Gemini</p>
+                </div>
+            </div>
+
+            <!-- API Settings Button & Badge -->
+            <div class="flex items-center gap-2">
+                <button id="toggleApiSettingsBtn" onclick="toggleApiSettings()" class="flex items-center gap-2 px-3 py-2 bg-cardDark border border-borderColor hover:border-accentLavender/50 rounded-xl text-xs sm:text-sm text-slate-200 transition-all shadow-sm">
+                    <span>🔑 Cài đặt API</span>
+                    <span id="activeModelBadge" class="bg-indigo-950 text-indigo-300 border border-indigo-800 text-[11px] px-2 py-0.5 rounded-md font-mono">gemini-3.1-pro-preview</span>
+                    <i id="apiSettingsChevron" class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform duration-200"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Upgraded API Settings Panel (Collapsible) -->
+        <div id="apiSettingsPanel" class="hidden bg-cardDark border border-borderColor rounded-2xl p-4 sm:p-6 space-y-4 shadow-xl transition-all">
+            <div class="flex items-center justify-between border-b border-borderColor/60 pb-3">
+                <h3 class="text-sm font-semibold text-accentLavender flex items-center gap-2">
+                    <i class="fa-solid fa-key"></i> Cấu hình kết nối Gemini API
+                </h3>
+                <span class="text-xs text-slate-400">Lưu trực tiếp vào trình duyệt</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- API Key Input -->
+                <div class="space-y-1.5">
+                    <label class="text-xs font-medium text-slate-300 flex items-center justify-between">
+                        <span>Gemini API Key</span>
+                        <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" class="text-accentLavender hover:underline text-[11px]">Lấy Key miễn phí ↗</a>
+                    </label>
+                    <div class="relative">
+                        <input type="password" id="apiKeyInput" placeholder="Nhập API Key (ví dụ: AIzaSy...)" 
+                            class="w-full bg-inputBg border border-borderColor focus:border-accentLavender rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none transition-colors pr-10">
+                        <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 text-xs">
+                            <i id="eyeIcon" class="fa-regular fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Model Selector -->
+                <div class="space-y-1.5">
+                    <label class="text-xs font-medium text-slate-300">Mô hình AI (Gemini Model)</label>
+                    <div class="flex gap-2">
+                        <select id="modelSelect" onchange="handleModelSelectChange()" class="w-full bg-inputBg border border-borderColor focus:border-accentLavender rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none transition-colors">
+                            <option value="gemini-3.1-pro-preview" selected>gemini-3.1-pro-preview (Khuyên dùng - Mới nhất)</option>
+                            <option value="gemini-3-flash-preview">gemini-3-flash-preview (Nhanh & Chuẩn)</option>
+                            <option value="gemini-2.5-flash">gemini-2.5-flash (Nhanh tiêu chuẩn)</option>
+                            <option value="gemini-2.5-flash-lite">gemini-2.5-flash-lite (Tối ưu nhẹ)</option>
+                            <option value="custom">-- Nhập Custom Model ID --</option>
+                        </select>
+                        <button type="button" onclick="loadModelsFromKey()" title="Tải danh sách model hỗ trợ từ Key của bạn" 
+                            class="px-3 py-2 bg-indigo-900/50 hover:bg-indigo-800/60 border border-indigo-700/60 rounded-xl text-xs font-medium text-indigo-200 flex items-center gap-1.5 whitespace-nowrap transition-all">
+                            <i class="fa-solid fa-arrows-rotate text-xs"></i>
+                            <span class="hidden sm:inline">🔄 Tải model từ Key</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Custom Model Input (Hidden by default) -->
+            <div id="customModelWrapper" class="hidden space-y-1.5 pt-1">
+                <label class="text-xs font-medium text-slate-300">Tên Model Tự Nhập (Custom Model ID)</label>
+                <input type="text" id="customModelInput" placeholder="Ví dụ: gemini-1.5-pro-latest" 
+                    class="w-full bg-inputBg border border-borderColor focus:border-accentLavender rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none font-mono">
+            </div>
+
+            <!-- Dynamic Model Load Status Message -->
+            <div id="modelStatusMsg" class="hidden text-xs px-3 py-2 rounded-lg bg-emerald-950/40 border border-emerald-800/50 text-emerald-300 flex items-center gap-2">
+                <i class="fa-solid fa-circle-check"></i>
+                <span id="modelStatusText">Đã tải thành công danh sách model.</span>
+            </div>
+
+            <!-- Action Buttons for API Settings -->
+            <div class="flex items-center justify-between pt-2 border-t border-borderColor/40">
+                <div class="text-[11px] text-slate-400">
+                    <i class="fa-solid fa-shield-halved mr-1"></i> Key được bảo mật lưu ở trình duyệt của bạn (localStorage).
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="clearApiKey()" class="px-3 py-1.5 rounded-lg border border-rose-900/40 bg-rose-950/20 text-rose-300 hover:bg-rose-900/40 text-xs transition-colors">
+                        Xóa Key
+                    </button>
+                    <button type="button" onclick="saveApiSettings()" class="px-4 py-1.5 rounded-lg bg-accentLavender hover:bg-accentLavenderHover text-slate-950 font-semibold text-xs transition-colors shadow-md">
+                        Lưu Key & Đóng
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Solver Card -->
+        <main class="bg-cardDark border border-borderColor rounded-2xl p-4 sm:p-6 md:p-8 space-y-6 shadow-2xl">
+            
+            <!-- Subject Selector Tabs -->
+            <div class="space-y-2">
+                <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Môn học</label>
+                <div class="grid grid-cols-3 gap-2 sm:gap-3">
+                    <button type="button" onclick="setSubject('Toán')" id="tab-Toán" 
+                        class="subject-tab py-3 px-3 rounded-xl font-bold text-sm sm:text-base flex items-center justify-center gap-2 transition-all shadow-sm bg-accentLavender text-slate-950 border border-accentLavender">
+                        <span>📐</span> Toán
+                    </button>
+                    <button type="button" onclick="setSubject('Lý')" id="tab-Lý" 
+                        class="subject-tab py-3 px-3 rounded-xl font-medium text-sm sm:text-base flex items-center justify-center gap-2 transition-all bg-cardDark text-slate-200 border border-borderHover hover:border-accentLavender/50">
+                        <span>⚛️</span> Lý
+                    </button>
+                    <button type="button" onclick="setSubject('Hóa')" id="tab-Hóa" 
+                        class="subject-tab py-3 px-3 rounded-xl font-medium text-sm sm:text-base flex items-center justify-center gap-2 transition-all bg-cardDark text-slate-200 border border-borderHover hover:border-accentLavender/50">
+                        <span>🧪</span> Hóa
+                    </button>
+                </div>
+            </div>
+
+            <!-- Grade & Response Style Side-by-Side Dropdowns -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Dropdown Lớp -->
+                <div class="space-y-1.5">
+                    <label class="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+                        <i class="fa-solid fa-graduation-cap text-accentLavender"></i> Lớp
+                    </label>
+                    <select id="gradeSelect" class="w-full bg-inputBg border border-borderHover focus:border-accentLavender rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white focus:outline-none transition-colors">
+                        <option value="Lớp 6">Lớp 6</option>
+                        <option value="Lớp 7">Lớp 7</option>
+                        <option value="Lớp 8">Lớp 8</option>
+                        <option value="Lớp 9">Lớp 9</option>
+                        <option value="Lớp 10">Lớp 10</option>
+                        <option value="Lớp 11">Lớp 11</option>
+                        <option value="Lớp 12" selected>Lớp 12</option>
+                        <option value="Đại học">Đại học / Cao đẳng</option>
+                    </select>
+                </div>
+
+                <!-- Dropdown Kiểu trả lời -->
+                <div class="space-y-1.5">
+                    <label class="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+                        <i class="fa-solid fa-list-check text-accentLavender"></i> Kiểu trả lời
+                    </label>
+                    <select id="styleSelect" class="w-full bg-inputBg border border-borderHover focus:border-accentLavender rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white focus:outline-none transition-colors">
+                        <option value="Giải chi tiết từng bước" selected>Giải chi tiết từng bước</option>
+                        <option value="Chỉ gợi ý hướng làm">Chỉ gợi ý hướng làm</option>
+                        <option value="Đáp án + tóm tắt">Đáp án + tóm tắt</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Textarea Đề Bài -->
+            <div class="space-y-1.5">
+                <div class="flex items-center justify-between">
+                    <label class="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+                        <i class="fa-regular fa-pen-to-square text-accentLavender"></i> Đề bài
+                    </label>
+                    <span id="charCount" class="text-[11px] text-slate-500">0 ký tự</span>
+                </div>
+                <textarea id="problemInput" rows="4" oninput="updateCharCount()"
+                    placeholder="Ví dụ: Giải phương trình x^2 - 5x + 6 = 0" 
+                    class="w-full bg-inputBg border border-borderHover focus:border-accentLavender rounded-xl p-3.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none transition-colors resize-y min-h-[110px] leading-relaxed"></textarea>
+            </div>
+
+            <!-- Image Upload Row -->
+            <div class="space-y-3" id="dropArea">
+                <div class="flex flex-wrap items-center gap-3">
+                    <!-- File Upload Button -->
+                    <label class="cursor-pointer border-2 border-dashed border-accentLavender/50 hover:border-accentLavender bg-accentLavender/5 hover:bg-accentLavender/10 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-medium text-accentLavender transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-camera"></i>
+                        <span>📷 Tải ảnh đề bài (tối đa 3)</span>
+                        <input type="file" id="imageFileInput" accept="image/*" multiple onchange="handleFileSelect(event)" class="hidden">
+                    </label>
+
+                    <!-- Paste Screenshot Button -->
+                    <button type="button" onclick="triggerPasteTip()" class="border border-borderHover bg-inputBg hover:bg-cardDark hover:border-slate-500 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-medium text-slate-200 transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-paste text-slate-400"></i>
+                        <span>📋 Dán ảnh chụp màn hình</span>
+                    </button>
+                </div>
+
+                <!-- Helper Tip Text -->
+                <p class="text-[11px] text-slate-400 flex items-start gap-1.5">
+                    <i class="fa-regular fa-lightbulb text-amber-400 mt-0.5"></i>
+                    <span>Mẹo: chụp màn hình (Win+Shift+S, hoặc Cmd+Ctrl+Shift+4 trên Mac) rồi bấm <strong>Ctrl+V</strong> ở bất kỳ đâu trên trang. Kéo thả ảnh vào cũng được.</span>
+                </p>
+
+                <!-- Image Preview Area -->
+                <div id="imagePreviewContainer" class="hidden flex flex-wrap gap-3 pt-2">
+                    <!-- Dynamically populated thumbnail elements -->
+                </div>
+            </div>
+
+            <!-- Quick Try Row -->
+            <div class="flex flex-wrap items-center gap-2 text-xs pt-1 border-t border-borderColor/40">
+                <span class="text-slate-400 font-medium">Thử nhanh:</span>
+                <div id="quickTryContainer" class="flex flex-wrap gap-2">
+                    <!-- Populated dynamically based on current subject -->
+                </div>
+            </div>
+
+            <!-- Bottom Action Row -->
+            <div class="flex items-center gap-3 pt-2">
+                <button type="button" onclick="solveProblem()" id="solveBtn" 
+                    class="flex-1 bg-accentLavender hover:bg-accentLavenderHover text-slate-950 font-bold py-3.5 px-6 rounded-xl text-sm sm:text-base transition-all shadow-lg shadow-accentLavender/10 flex items-center justify-center gap-2 active:scale-[0.99]">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>Giải bài này ✨</span>
+                </button>
+
+                <button type="button" onclick="clearForm()" class="bg-inputBg border border-borderHover hover:border-slate-500 text-slate-300 font-medium py-3.5 px-5 rounded-xl text-sm transition-all hover:text-white">
+                    Xóa
+                </button>
+            </div>
+
+        </main>
+
+        <!-- Output / Solution Card -->
+        <section id="solutionCard" class="hidden bg-cardDark border border-borderColor rounded-2xl p-4 sm:p-6 md:p-8 space-y-4 shadow-2xl transition-all">
+            <!-- Output Header -->
+            <div class="flex items-center justify-between border-b border-borderColor/80 pb-4">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-950/60 border border-emerald-700/60 flex items-center justify-center text-emerald-400 text-sm">
+                        💡
+                    </div>
+                    <h2 class="text-base sm:text-lg font-bold text-white">Lời Giải Chi Tiết</h2>
+                </div>
+
+                <button type="button" onclick="copySolution()" id="copyBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-inputBg border border-borderHover hover:border-accentLavender text-xs font-medium text-slate-200 transition-colors">
+                    <i class="fa-regular fa-copy text-accentLavender"></i>
+                    <span id="copyBtnText">📋 Sao chép lời giải</span>
+                </button>
+            </div>
+
+            <!-- Loading Spinner State -->
+            <div id="solutionLoading" class="hidden py-12 flex flex-col items-center justify-center gap-4 text-center">
+                <div class="relative w-12 h-12">
+                    <div class="absolute inset-0 rounded-full border-4 border-accentLavender/20"></div>
+                    <div class="absolute inset-0 rounded-full border-4 border-accentLavender border-t-transparent animate-spin"></div>
+                </div>
+                <div class="space-y-1">
+                    <p class="text-sm font-semibold text-slate-200 animate-pulse">AI đang phân tích & giải toán...</p>
+                    <p class="text-xs text-slate-400">Vui lòng đợi vài giây để nhận công thức và từng bước chi tiết</p>
+                </div>
+            </div>
+
+            <!-- Solution Content Output (Rendered Markdown & Math) -->
+            <div id="solutionOutput" class="prose-custom text-slate-200 text-sm sm:text-base leading-relaxed overflow-x-auto">
+                <!-- Content injected here -->
+            </div>
+
+            <!-- Detailed Error Box (Dark Red Tint) -->
+            <div id="solutionError" class="hidden rounded-xl border border-rose-900/70 bg-rose-950/40 p-4 space-y-3">
+                <div class="flex items-center gap-2 text-rose-400 font-bold text-sm">
+                    <i class="fa-solid fa-triangle-exclamation text-base"></i>
+                    <span id="errorTitle">Không thể hoàn thành lời giải</span>
+                </div>
+                
+                <p id="errorSubtitle" class="text-xs text-rose-200/90 leading-relaxed">
+                    Đã xảy ra lỗi khi kết nối với máy chủ AI.
+                </p>
+
+                <!-- Monospace Raw Error Message Code Block -->
+                <div class="bg-black/60 rounded-lg p-3 border border-rose-900/50 font-mono text-xs text-rose-300 overflow-x-auto whitespace-pre-wrap max-h-48" id="errorRawCode">
+                    HTTP Error
+                </div>
+
+                <!-- Vietnamese Troubleshooting Hint -->
+                <div class="text-xs text-slate-300 bg-black/30 rounded-lg p-3 border border-rose-900/30 flex items-start gap-2">
+                    <i class="fa-solid fa-wrench text-amber-400 mt-0.5"></i>
+                    <div class="space-y-1" id="errorTroubleshootHint">
+                        <p class="font-semibold text-amber-300">Hướng dẫn khắc phục:</p>
+                        <p>• Mở <strong>"🔑 Cài đặt API"</strong> ở góc trên và bấm nút <strong>"🔄 Tải model từ Key"</strong> để cập nhật danh sách model khả dụng với API Key của bạn.</p>
+                        <p>• Thử chọn model <code>gemini-3.1-pro-preview</code> hoặc <code>gemini-3-flash-preview</code>.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-8 text-center text-xs text-slate-400 py-4 border-t border-borderColor/40 max-w-4xl mx-auto w-full">
+        <p>AI Homework Solver • Hỗ trợ học tập Toán - Vật Lý - Hóa Học với Google Gemini API</p>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // State Management
+        let currentSubject = 'Toán';
+        let uploadedImages = []; // Stores objects { file, base64, mimeType, previewUrl }
+
+        const QUICK_QUERIES = {
+            'Toán': [
+                { text: "Giải phương trình x^2 - 5x + 6 = 0", query: "Giải phương trình x^2 - 5x + 6 = 0" },
+                { text: "Tính đạo hàm của y = x^3 * ln(x)", query: "Tính đạo hàm của hàm số y = x^3 * ln(x)" }
+            ],
+            'Lý': [
+                { text: "Phương trình dao động x = 4cos(2πt) cm", query: "Một vật dao động điều hòa với phương trình x = 4cos(2πt) cm. Tìm chu kỳ, tần số và vận tốc cực đại của vật." },
+                { text: "Tính bước sóng λ = v / f", query: "Sóng cơ truyền trong môi trường với vận tốc v = 1.2 m/s và tần số f = 10 Hz. Tính bước sóng λ." }
+            ],
+            'Hóa': [
+                { text: "5.6g Fe tác dụng dung dịch HCl dư", query: "Cho 5,6g Fe tác dụng hoàn toàn với dung dịch HCl dư. Tính thể tích khí H2 sinh ra ở điều kiện chuẩn (đkc)." },
+                { text: "Cân bằng PT: Fe + HNO3 -> Fe(NO3)3 + NO + H2O", query: "Cân bằng phản ứng hóa học sau bằng phương pháp thăng bằng electron: Fe + HNO3 đặc, nóng -> Fe(NO3)3 + NO2 + H2O" }
+            ]
+        };
+
+        const PLACEHOLDERS = {
+            'Toán': "Ví dụ: Giải phương trình x^2 - 5x + 6 = 0",
+            'Lý': "Ví dụ: Một vật dao động điều hòa với phương trình x = 4cos(2πt) cm...",
+            'Hóa': "Ví dụ: Cho 5,6g Fe tác dụng hoàn toàn với dung dịch HCl dư..."
+        };
+
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', () => {
+            loadSavedApiSettings();
+            updateQuickTryLinks();
+            setupDragAndDrop();
+            setupGlobalPaste();
+        });
+
+        // Subject Switcher
+        function setSubject(subj) {
+            currentSubject = subj;
+            
+            // Update UI tabs
+            ['Toán', 'Lý', 'Hóa'].forEach(s => {
+                const tab = document.getElementById(`tab-${s}`);
+                if (s === subj) {
+                    tab.className = "subject-tab py-3 px-3 rounded-xl font-bold text-sm sm:text-base flex items-center justify-center gap-2 transition-all shadow-sm bg-accentLavender text-slate-950 border border-accentLavender";
+                } else {
+                    tab.className = "subject-tab py-3 px-3 rounded-xl font-medium text-sm sm:text-base flex items-center justify-center gap-2 transition-all bg-cardDark text-slate-200 border border-borderHover hover:border-accentLavender/50";
+                }
+            });
+
+            // Update Textarea Placeholder
+            const textarea = document.getElementById('problemInput');
+            textarea.placeholder = PLACEHOLDERS[subj] || PLACEHOLDERS['Toán'];
+
+            // Update Quick Try Links
+            updateQuickTryLinks();
+        }
+
+        // Update Quick Try Links
+        function updateQuickTryLinks() {
+            const container = document.getElementById('quickTryContainer');
+            container.innerHTML = '';
+            
+            const queries = QUICK_QUERIES[currentSubject] || [];
+            queries.forEach(q => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'text-accentLavender hover:underline cursor-pointer transition-colors text-left font-medium';
+                btn.textContent = q.text;
+                btn.onclick = () => {
+                    document.getElementById('problemInput').value = q.query;
+                    updateCharCount();
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        // Character Counter
+        function updateCharCount() {
+            const val = document.getElementById('problemInput').value;
+            document.getElementById('charCount').textContent = `${val.length} ký tự`;
+        }
+
+        // API Settings Panel Handlers
+        function toggleApiSettings() {
+            const panel = document.getElementById('apiSettingsPanel');
+            const chevron = document.getElementById('apiSettingsChevron');
+            panel.classList.toggle('hidden');
+            chevron.classList.toggle('rotate-180');
+        }
+
+        function togglePasswordVisibility() {
+            const input = document.getElementById('apiKeyInput');
+            const icon = document.getElementById('eyeIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fa-regular fa-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'fa-regular fa-eye';
+            }
+        }
+
+        function handleModelSelectChange() {
+            const select = document.getElementById('modelSelect');
+            const customWrapper = document.getElementById('customModelWrapper');
+            const activeBadge = document.getElementById('activeModelBadge');
+            
+            if (select.value === 'custom') {
+                customWrapper.classList.remove('hidden');
+            } else {
+                customWrapper.classList.add('hidden');
+                activeBadge.textContent = select.value;
+            }
+        }
+
+        function getSelectedModel() {
+            const select = document.getElementById('modelSelect');
+            if (select.value === 'custom') {
+                const customVal = document.getElementById('customModelInput').value.trim();
+                return customVal || 'gemini-3.1-pro-preview';
+            }
+            return select.value;
+        }
+
+        function saveApiSettings() {
+            const key = document.getElementById('apiKeyInput').value.trim();
+            const model = getSelectedModel();
+
+            if (key) {
+                localStorage.setItem('gemini_api_key', key);
+            } else {
+                localStorage.removeItem('gemini_api_key');
+            }
+
+            localStorage.setItem('gemini_selected_model', model);
+            document.getElementById('activeModelBadge').textContent = model;
+            toggleApiSettings();
+        }
+
+        function clearApiKey() {
+            localStorage.removeItem('gemini_api_key');
+            document.getElementById('apiKeyInput').value = '';
+            document.getElementById('modelStatusMsg').classList.add('hidden');
+        }
+
+        function loadSavedApiSettings() {
+            const savedKey = localStorage.getItem('gemini_api_key') || '';
+            const savedModel = localStorage.getItem('gemini_selected_model') || 'gemini-3.1-pro-preview';
+
+            document.getElementById('apiKeyInput').value = savedKey;
+            
+            const select = document.getElementById('modelSelect');
+            let found = false;
+            for (let i = 0; i < select.options.length; i++) {
+                if (select.options[i].value === savedModel) {
+                    select.selectedIndex = i;
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found && savedModel !== 'gemini-3.1-pro-preview') {
+                select.value = 'custom';
+                document.getElementById('customModelWrapper').classList.remove('hidden');
+                document.getElementById('customModelInput').value = savedModel;
+            }
+
+            document.getElementById('activeModelBadge').textContent = savedModel;
+        }
+
+        // Dynamic API Model Fetching
+        async function loadModelsFromKey() {
+            const apiKey = document.getElementById('apiKeyInput').value.trim() || localStorage.getItem('gemini_api_key') || '';
+            const statusMsg = document.getElementById('modelStatusMsg');
+            const statusText = document.getElementById('modelStatusText');
+            
+            statusMsg.classList.remove('hidden');
+            statusMsg.className = "text-xs px-3 py-2 rounded-lg bg-indigo-950/50 border border-indigo-800/60 text-indigo-300 flex items-center gap-2";
+            statusText.textContent = "Đang tải danh sách model khả dụng từ Gemini API...";
+
+            if (!apiKey) {
+                statusMsg.className = "text-xs px-3 py-2 rounded-lg bg-rose-950/50 border border-rose-800/60 text-rose-300 flex items-center gap-2";
+                statusText.textContent = "Vui lòng nhập API Key trước khi bấm Tải model!";
+                return;
+            }
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    throw new Error(errData.error?.message || `Lỗi HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                const validModels = (data.models || []).filter(m => 
+                    m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent')
+                );
+
+                if (validModels.length === 0) {
+                    throw new Error("Không tìm thấy model nào hỗ trợ generateContent với API Key này.");
+                }
+
+                const select = document.getElementById('modelSelect');
+                select.innerHTML = ''; // Clear options
+
+                validModels.forEach(m => {
+                    const cleanName = m.name.replace('models/', '');
+                    const opt = document.createElement('option');
+                    opt.value = cleanName;
+                    opt.textContent = `${cleanName} (${m.displayName || 'Gemini Model'})`;
+                    select.appendChild(opt);
+                });
+
+                // Add custom option back
+                const customOpt = document.createElement('option');
+                customOpt.value = 'custom';
+                customOpt.textContent = '-- Nhập Custom Model ID --';
+                select.appendChild(customOpt);
+
+                // Auto select first option or pro model
+                const preferred = validModels.find(m => m.name.includes('gemini-3.1-pro') || m.name.includes('gemini-3-flash') || m.name.includes('gemini-2.5-flash'));
+                if (preferred) {
+                    select.value = preferred.name.replace('models/', '');
+                } else {
+                    select.selectedIndex = 0;
+                }
+
+                handleModelSelectChange();
+
+                statusMsg.className = "text-xs px-3 py-2 rounded-lg bg-emerald-950/50 border border-emerald-800/60 text-emerald-300 flex items-center gap-2";
+                statusText.textContent = `Thành công! Đã tải ${validModels.length} model khả dụng từ API Key của bạn.`;
+            } catch (err) {
+                statusMsg.className = "text-xs px-3 py-2 rounded-lg bg-rose-950/50 border border-rose-800/60 text-rose-300 flex items-center gap-2";
+                statusText.textContent = `Không thể tải danh sách model: ${err.message}`;
+            }
+        }
+
+        // Image Handling (Upload, Paste, Drag & Drop)
+        function setupDragAndDrop() {
+            const area = document.body;
+            ['dragenter', 'dragover'].forEach(eventName => {
+                area.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    document.getElementById('dropArea').classList.add('drag-active');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                area.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    document.getElementById('dropArea').classList.remove('drag-active');
+                }, false);
+            });
+
+            area.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files && files.length > 0) {
+                    processFiles(Array.from(files));
+                }
+            });
+        }
+
+        function setupGlobalPaste() {
+            window.addEventListener('paste', (e) => {
+                const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+                const imageFiles = [];
+                for (let item of items) {
+                    if (item.type.indexOf('image') === 0) {
+                        const blob = item.getAsFile();
+                        if (blob) imageFiles.push(blob);
+                    }
+                }
+                if (imageFiles.length > 0) {
+                    processFiles(imageFiles);
+                }
+            });
+        }
+
+        function triggerPasteTip() {
+            alert("Bạn chỉ cần nhấn tổ hợp phím Ctrl + V (hoặc Cmd + V trên Mac) bất kỳ lúc nào trên màn hình để dán ảnh vừa chụp.");
+        }
+
+        function handleFileSelect(e) {
+            const files = Array.from(e.target.files);
+            processFiles(files);
+            e.target.value = ''; // Reset input
+        }
+
+        function processFiles(files) {
+            const remaining = 3 - uploadedImages.length;
+            if (remaining <= 0) {
+                alert("Bạn chỉ được tải lên tối đa 3 ảnh đề bài.");
+                return;
+            }
+
+            const validImages = files.filter(f => f.type.startsWith('image/')).slice(0, remaining);
+            
+            validImages.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const base64Full = e.target.result;
+                    const base64Data = base64Full.split(',')[1];
+                    const mimeType = file.type || 'image/png';
+
+                    uploadedImages.push({
+                        file,
+                        base64: base64Data,
+                        mimeType,
+                        previewUrl: base64Full
+                    });
+
+                    renderImagePreviews();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function removeImage(index) {
+            uploadedImages.splice(index, 1);
+            renderImagePreviews();
+        }
+
+        function renderImagePreviews() {
+            const container = document.getElementById('imagePreviewContainer');
+            if (uploadedImages.length === 0) {
+                container.classList.add('hidden');
+                container.innerHTML = '';
+                return;
+            }
+
+            container.classList.remove('hidden');
+            container.innerHTML = '';
+
+            uploadedImages.forEach((img, idx) => {
+                const div = document.createElement('div');
+                div.className = 'relative w-20 h-20 rounded-xl overflow-hidden border border-borderColor bg-inputBg group shadow-md';
+                div.innerHTML = `
+                    <img src="${img.previewUrl}" class="w-full h-full object-cover" alt="Đề bài ${idx + 1}">
+                    <button type="button" onclick="removeImage(${idx})" 
+                        class="absolute top-1 right-1 bg-rose-600/90 hover:bg-rose-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold transition-all shadow-md">
+                        ×
+                    </button>
+                    <span class="absolute bottom-1 left-1 bg-black/70 text-[10px] text-slate-300 px-1 rounded">Ảnh ${idx + 1}</span>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function clearForm() {
+            document.getElementById('problemInput').value = '';
+            updateCharCount();
+            uploadedImages = [];
+            renderImagePreviews();
+            document.getElementById('solutionCard').classList.add('hidden');
+        }
+
+        // Main AI Solving Function
+        async function solveProblem() {
+            const problemText = document.getElementById('problemInput').value.trim();
+            const grade = document.getElementById('gradeSelect').value;
+            const responseStyle = document.getElementById('styleSelect').value;
+            const model = getSelectedModel();
+
+            // Check if user provided text or images
+            if (!problemText && uploadedImages.length === 0) {
+                alert("Vui lòng nhập đề bài hoặc dán/tải lên ít nhất 1 hình ảnh đề bài!");
+                return;
+            }
+
+            // Get API key
+            const apiKey = localStorage.getItem('gemini_api_key') || "";
+
+            // Show Solution Card & Loading State
+            const card = document.getElementById('solutionCard');
+            const loading = document.getElementById('solutionLoading');
+            const output = document.getElementById('solutionOutput');
+            const errorBox = document.getElementById('solutionError');
+
+            card.classList.remove('hidden');
+            loading.classList.remove('hidden');
+            output.classList.add('hidden');
+            errorBox.classList.add('hidden');
+            card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            // Construct System Instructions & Prompt
+            const systemPrompt = `Bạn là một giáo viên chuyên gia giảng dạy môn ${currentSubject} ở trình độ ${grade} tại Việt Nam.
+Nhiệm vụ của bạn là giải bài tập được cung cấp theo yêu cầu kiểu trả lời: "${responseStyle}".
+
+QUY TẮC BẮT BUỘC KHI TRÌNH BÀY:
+1. Trả lời hoàn toàn bằng Tiếng Việt, lịch sự, chuẩn sư phạm.
+2. Viết toàn bộ công thức toán học, vật lý, hóa học bằng định dạng LaTeX chuẩn:
+   - Dùng $...$ cho công thức inline (ví dụ: $x^2 - 5x + 6 = 0$).
+   - Dùng $$...$$ cho khối công thức toán riêng biệt nằm giữa dòng.
+3. KHI VIẾT CÔNG THỨC HOẶC PHƯƠNG TRÌNH TRONG CÁC BƯỚC GIẢI CHI TIẾT:
+   BẮT BUỘC luôn luôn hiển thị phương trình đã thay số cụ thể ngay bên dưới dòng công thức tổng quát. 
+   (Ví dụ: 
+   Công thức: $v = v_0 + a \\cdot t$
+   Thay số: $v = 0 + 2 \\cdot 5 = 10\\text{ m/s}$)
+4. Trình bày các bước mạch lạc, rõ ràng, phân tích từng giả thiết nếu cần.
+5. Cuối bài luôn có mục **Kết luận / Đáp số** rõ ràng được đóng khung hoặc tô đậm.`;
+
+            let userPromptText = `Đề bài môn ${currentSubject} (${grade}):\n${problemText || "(Vui lòng xem hình ảnh đề bài đính kèm)"}\n\nYêu cầu trả lời: ${responseStyle}.`;
+
+            // Prepare Gemini Request Payload
+            const parts = [{ text: userPromptText }];
+            
+            // Append base64 images if present
+            uploadedImages.forEach(img => {
+                parts.push({
+                    inlineData: {
+                        mimeType: img.mimeType,
+                        data: img.base64
+                    }
+                });
+            });
+
+            const payload = {
+                contents: [{ parts }],
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                }
+            };
+
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    let parsedErr;
+                    try { parsedErr = JSON.parse(errorText); } catch(e) { parsedErr = { error: { message: errorText } }; }
+
+                    showErrorDetails(response.status, parsedErr, model);
+                    return;
+                }
+
+                const result = await response.json();
+                const candidate = result.candidates?.[0];
+                const solutionText = candidate?.content?.parts?.[0]?.text;
+
+                if (!solutionText) {
+                    throw new Error("Phản hồi từ AI không chứa dữ liệu lời giải hợp lệ.");
+                }
+
+                // Render Markdown Content
+                output.innerHTML = marked.parse(solutionText);
+
+                // Render KaTeX Math
+                renderMathInElement(output, {
+                    delimiters: [
+                        { left: '$$', right: '$$', display: true },
+                        { left: '$', right: '$', display: false },
+                        { left: '\\(', right: '\\)', display: false },
+                        { left: '\\[', right: '\\]', display: true }
+                    ],
+                    throwOnError: false
+                });
+
+                loading.classList.add('hidden');
+                output.classList.remove('hidden');
+
+            } catch (err) {
+                showErrorDetails(0, { error: { message: err.message } }, model);
+            }
+        }
+
+        // Display Detailed Error Card with Raw Info & Vietnamese Hints
+        function showErrorDetails(status, errorObj, model) {
+            const loading = document.getElementById('solutionLoading');
+            const errorBox = document.getElementById('solutionError');
+            const errorTitle = document.getElementById('errorTitle');
+            const errorSubtitle = document.getElementById('errorSubtitle');
+            const errorRawCode = document.getElementById('errorRawCode');
+            const hintContainer = document.getElementById('errorTroubleshootHint');
+
+            loading.classList.add('hidden');
+            errorBox.classList.remove('hidden');
+
+            const statusText = status ? `(Mã lỗi: HTTP ${status})` : '';
+            errorTitle.textContent = `Không thể hoàn thành lời giải ${statusText}`;
+            
+            const rawMsg = errorObj.error?.message || JSON.stringify(errorObj, null, 2);
+            errorRawCode.textContent = rawMsg;
+
+            let hintHtml = '';
+
+            if (status === 404 || rawMsg.includes('not found') || rawMsg.includes('no longer available')) {
+                errorSubtitle.textContent = `Model '${model}' không khả dụng hoặc không hỗ trợ tài khoản / vùng của bạn.`;
+                hintHtml = `
+                    <p class="font-semibold text-amber-300">Hướng dẫn khắc phục:</p>
+                    <p>• Mở <strong>"🔑 Cài đặt API"</strong> ở góc trên và bấm nút <strong>"🔄 Tải model từ Key"</strong> để tự động liệt kê các model đang hoạt động thực tế với Key của bạn.</p>
+                    <p>• Hoặc đổi mô hình sang <code>gemini-3.1-pro-preview</code> hoặc <code>gemini-3-flash-preview</code>.</p>
+                `;
+            } else if (status === 401 || rawMsg.includes('API key not valid')) {
+                errorSubtitle.textContent = `API Key không hợp lệ hoặc đã bị vô hiệu hóa.`;
+                hintHtml = `
+                    <p class="font-semibold text-amber-300">Hướng dẫn khắc phục:</p>
+                    <p>• Mở <strong>"🔑 Cài đặt API"</strong> và dán đúng chuỗi Gemini API Key bắt đầu bằng <code>AIzaSy...</code> từ Google AI Studio.</p>
+                    <p>• Bạn có thể lấy Key miễn phí tại <a href="https://aistudio.google.com/apikey" target="_blank" class="underline text-accentLavender">aistudio.google.com/apikey</a>.</p>
+                `;
+            } else if (status === 429 || rawMsg.includes('RESOURCE_EXHAUSTED')) {
+                errorSubtitle.textContent = `Hệ thống vượt quá hạn ngạch yêu cầu (Rate Limit).`;
+                hintHtml = `
+                    <p class="font-semibold text-amber-300">Hướng dẫn khắc phục:</p>
+                    <p>• Vui lòng đợi khoảng 30 - 60 giây rồi nhấn nút <strong>"Giải bài này ✨"</strong> lại.</p>
+                    <p>• Hoặc chuyển sang mô hình nhẹ hơn như <code>gemini-2.5-flash-lite</code> trong phần Cài đặt API.</p>
+                `;
+            } else {
+                errorSubtitle.textContent = `Đã xảy ra sự cố khi giao tiếp với máy chủ Google AI.`;
+                hintHtml = `
+                    <p class="font-semibold text-amber-300">Hướng dẫn khắc phục:</p>
+                    <p>• Kiểm tra lại kết nối mạng internet của bạn.</p>
+                    <p>• Mở <strong>"🔑 Cài đặt API"</strong> và thử bấm <strong>"🔄 Tải model từ Key"</strong> để chọn model khác.</p>
+                `;
+            }
+
+            hintContainer.innerHTML = hintHtml;
+        }
+
+        // Copy Solution to Clipboard
+        function copySolution() {
+            const output = document.getElementById('solutionOutput');
+            const textToCopy = output.innerText || output.textContent;
+
+            if (!textToCopy) return;
+
+            // Use execCommand fallback for iFrame compatibility
+            const tempTextarea = document.createElement('textarea');
+            tempTextarea.value = textToCopy;
+            document.body.appendChild(tempTextarea);
+            tempTextarea.select();
+            
+            try {
+                document.execCommand('copy');
+                const copyBtnText = document.getElementById('copyBtnText');
+                copyBtnText.textContent = '✅ Đã sao chép!';
+                setTimeout(() => {
+                    copyBtnText.textContent = '📋 Sao chép lời giải';
+                }, 2000);
+            } catch (err) {
+                alert('Không thể tự động sao chép. Vui lòng tô bôi đen và nhấn Ctrl+C.');
+            } finally {
+                document.body.removeChild(tempTextarea);
+            }
+        }
+    </script>
+</body>
+</html>
